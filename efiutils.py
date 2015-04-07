@@ -184,11 +184,12 @@ def update_struct_offsets(data_addr, struct_name):
     for xref in xrefs:
         # We're only interested in xrefs in code where the left operand is a register, and the right operand is the
         # memory address of our data structure.
-        if GetOpType(xref, 0) == o_reg and GetOpType(xref, 1) == o_mem and GetOperandValue(xref, 1) == struct_name:
-            print "Processing xref from 0x%x: %s" % (xref, GetDisasm(xref))
-            update_struct_offsets_for_xref(xref, struct_name)
-        else:
-            print "Too hard basket - xref from 0x%x: %s" % (xref, GetDisasm(xref))
+        update_struct_offsets_for_xref(xref, struct_name)
+        # if GetOpType(xref, 0) == o_reg and GetOpType(xref, 1) == o_mem and GetOperandValue(xref, 1) == struct_name:
+        #     print "Processing xref from 0x%x: %s" % (xref, GetDisasm(xref))
+        #     update_struct_offsets_for_xref(xref, struct_name)
+        # else:
+        #     print "Too hard basket - xref from 0x%x: %s" % (xref, GetDisasm(xref))
 
 
 def update_struct_offsets_for_xref(xref, struct_name):
@@ -274,27 +275,27 @@ def rename_guids():
 
     # Find all the data segments in this binary
     for seg in Segments():
-        if isData(GetFlags(seg)):
-            print "Processing data segment at 0x%x" % seg
+        # if isData(GetFlags(seg)):
+        print "Processing data segment at 0x%x" % seg
 
-            # Find any GUIDs we know about in the data segment
-            addr = seg
-            seg_end = SegEnd(seg)
-            while addr < seg_end:
-                d = [Dword(addr), Dword(addr+0x4), Dword(addr+0x8), Dword(addr+0xC)]
-                if (d[0] == 0 and d[1] == 0 and d[2] == 0 and d[3] == 0) or \
-                    (d[0] == 0xFFFFFFFF and d[1] == 0xFFFFFFFF and d[2] == 0xFFFFFFFF and d[3] == 0xFFFFFFFF):
-                     pass
-                else:
-                    guid = GUID(bytes=struct.pack("<LLLL", d[0], d[1], d[2], d[3]))
-                    #print "Checking GUID %s at 0x%x" % (str(guid), addr) 
-                    gstr = str(guid)
-                    if gstr in guids.keys():
-                        print "  - Found GUID %s (%s) at 0x%x" % (gstr, guids[gstr], addr)
-                        MakeName(addr, underscore_to_global(guids[gstr]))
-                addr += 0x08
-        else:
-            print "Skipping non-data segment at 0x%x" % seg
+        # Find any GUIDs we know about in the data segment
+        addr = seg
+        seg_end = SegEnd(seg)
+        while addr < seg_end:
+            d = [Dword(addr), Dword(addr+0x4), Dword(addr+0x8), Dword(addr+0xC)]
+            if (d[0] == 0 and d[1] == 0 and d[2] == 0 and d[3] == 0) or \
+                (d[0] == 0xFFFFFFFF and d[1] == 0xFFFFFFFF and d[2] == 0xFFFFFFFF and d[3] == 0xFFFFFFFF):
+                 pass
+            else:
+                guid = GUID(bytes=struct.pack("<LLLL", d[0], d[1], d[2], d[3]))
+                #print "Checking GUID %s at 0x%x" % (str(guid), addr)
+                gstr = str(guid)
+                if gstr in guids.keys():
+                    print "  - Found GUID %s (%s) at 0x%x" % (gstr, guids[gstr], addr)
+                    MakeName(addr, underscore_to_global(guids[gstr]))
+            addr += 0x08
+        # else:
+            # print "Skipping non-data segment at 0x%x" % seg
 
 
 def update_protocols():
